@@ -1,5 +1,9 @@
 /* your beautiful css styling goes here! */
 
-/* Note: an asteroid image is included in this repo. 
+/* Note: an asteroid image is included in this repo.
 Feel free to use it if you like. */
 
+
+.gameboardContainer {
+  box-shadow: 5px 5px 5px 5px;
+}
