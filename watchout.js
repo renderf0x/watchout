@@ -3,7 +3,8 @@
 var gameOptions = {
   height: 450,
   width: 700,
-  nEnemies: 30
+  nEnemies: 30,
+  intervalTime: 5000
 }
 
 var scale = {
@@ -42,3 +43,22 @@ svgContainer.selectAll('circle').data(enemies)
   }).attr('cy', function(enemy) {
     return scale.y(enemy.y);
   });
+
+var moveEnemies = function() {
+  svgContainer.selectAll('circle').transition()
+    .duration(gameOptions.intervalTime)
+    .attr('cx', scale.x(Math.random() * 100))
+    .attr('cx', function() {
+      return scale.x(Math.random() * 100)
+    })
+    .attr('cy', function() {
+      return scale.y(Math.random() * 100)
+    });
+};
+
+moveEnemies();
+setInterval(moveEnemies, gameOptions.intervalTime);
+
+
+
+
