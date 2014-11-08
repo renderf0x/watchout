@@ -41,7 +41,7 @@ d3.select('body').on('keyup', function() {
 var gameOptions = {
   height: 600,
   width: 900,
-  nEnemies: 30,
+  nEnemies: 10,
   intervalTime: 2000
 };
 
@@ -73,6 +73,8 @@ var createEnemies = function(){
   return _.range(0, gameOptions.nEnemies).map(function(index){
     return {
       enemy_id: index,
+      // enemy size
+      // enemy velocity as a function of size
       x: Math.random() * 100,
       y: Math.random() * 100,
     }
@@ -104,6 +106,7 @@ var moveEnemies = function() {
 
   svgContainer.selectAll('.enemy')
     .transition()
+    .ease('linear')
     .duration(gameOptions.intervalTime)
     .attr('cx', function(d) {
       return scale.x(d.x);
@@ -113,6 +116,9 @@ var moveEnemies = function() {
     })
     .tween('custom', tweenWithCollisionDetection);
 };
+
+/******************************************************/
+/******************************************************/
 
 var onCollision = function () {
   // console.log("Collision!!!!@@RUKFGOUYG");
@@ -136,7 +142,6 @@ var checkCollision = function (enemy, callback) {
     // (or something like that)
     callback();
   }
-
 };
 
 var tweenWithCollisionDetection = function (endData) {
@@ -179,7 +184,7 @@ var Player = function () {
   this.x = 50;
   this.y = 50;
   this.velocity = 0;
-  this.maxVelocity = 2;
+  this.maxVelocity = 10;
   this.rotation = -Math.PI/2;
 
   this.createNode();
@@ -204,6 +209,13 @@ Player.prototype.render = function() {
 };
 
 Player.prototype.updateShip = function() {
+
+  var moveForward = function() {
+    this.x += (Math.cos(this.rotation) * this.velocity)/ 4;
+    this.y += (Math.sin(this.rotation) * this.velocity)/ 4;
+  }
+
+  // WRAP AROUND CODE
   if (this.y > 100) {
     this.y = 0;
   }
@@ -216,17 +228,26 @@ Player.prototype.updateShip = function() {
   if (this.x < 0) {
     this.x = 100;
   }
+  // END WRAP AROUND CODE
 
+  // VELOCITY LOGIC
   if (UPKEY == true) {
-    this.y -= 1;
+    this.velocity += 0.1;
+    this.velocity = Math.min(this.velocity, this.maxVelocity);
+    moveForward.call(this);
+  } else {
+    this.velocity -= 0.05;
+    this.velocity = Math.max(0, this.velocity);
+    moveForward.call(this);
   }
+
   if (LEFTKEY == true) {
-    this.x -= 1;
+    this.rotation -= 0.1;
   }
   if (RIGHTKEY == true) {
-    this.x += 1;
+    this.rotation += 0.1;
   }
-  debugger;
+  // debugger;
   this.render();
 }
 
