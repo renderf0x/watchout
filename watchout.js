@@ -1,4 +1,42 @@
 // start slingin' some d3 here.
+/******************************************************/
+/******************************************************/
+// GAME SETUP
+
+var UPKEY = false;
+var LEFTKEY = false;
+var RIGHTKEY = false;
+var SPACEKEY = false;
+
+d3.select('body').on('keydown', function() {
+  if (d3.event.keyCode == 38) {
+    UPKEY = true;
+  }
+  if (d3.event.keyCode == 37) {
+    LEFTKEY = true;
+  }
+  if (d3.event.keyCode == 39) {
+    RIGHTKEY = true;
+  }
+  if (d3.event.keyCode == 32) {
+    SPACEKEY = true;
+  }
+})
+
+d3.select('body').on('keyup', function() {
+  if (d3.event.keyCode == 38) {
+    UPKEY = false;
+  }
+  if (d3.event.keyCode == 37) {
+    LEFTKEY = false;
+  }
+  if (d3.event.keyCode == 39) {
+    RIGHTKEY = false;
+  }
+  if (d3.event.keyCode == 32) {
+    SPACEKEY = false;
+  }
+})
 
 var gameOptions = {
   height: 600,
@@ -27,6 +65,10 @@ var svgContainer = gameBoardContainer
 
 svgContainer.classed('gameboard', true);
 
+/******************************************************/
+/******************************************************/
+// ENEMIES STUFF
+
 var createEnemies = function(){
   return _.range(0, gameOptions.nEnemies).map(function(index){
     return {
@@ -38,7 +80,7 @@ var createEnemies = function(){
 };
 
 var renderEnemies = function() {
-  svgContainer.selectAll('circle').data(enemies)
+  svgContainer.selectAll('circle').data(enemies, function(d){return d.enemy_id})
     .enter()
     .append('circle')
     .attr('r', 10)
@@ -54,14 +96,20 @@ var renderEnemies = function() {
 };
 
 var moveEnemies = function() {
+
+  enemies.forEach(function(enemy){
+    enemy.x = Math.random() * 100;
+    enemy.y = Math.random() * 100;
+  });
+
   svgContainer.selectAll('.enemy')
     .transition()
     .duration(gameOptions.intervalTime)
-    .attr('cx', function() {
-      return scale.x(Math.random() * 100)
+    .attr('cx', function(d) {
+      return scale.x(d.x);
     })
-    .attr('cy', function() {
-      return scale.y(Math.random() * 100)
+    .attr('cy', function(d) {
+      return scale.y(d.y);
     })
     .tween('custom', tweenWithCollisionDetection);
 };
@@ -126,21 +174,61 @@ var resetScore = function() {
 /******************************************************/
 
 var Player = function () {
-  this.createAndRenderPlayer();
-  // this.setupDragging();
-}
 
-Player.prototype.createAndRenderPlayer = function(){
+  // x and y are scaled from 1-100
+  this.x = 50;
+  this.y = 50;
+  this.velocity = 0;
+  this.maxVelocity = 2;
+  this.rotation = -Math.PI/2;
+
+  this.createNode();
+  this.render();
+  // this.setupDragging();
+};
+
+Player.prototype.createNode = function(){
   this.playerNode = svgContainer.selectAll('.player')
     .data([0])
     .enter()
     .append('circle')
     .attr('r', 10)
-    .attr('cx', scale.x(50))
-    .attr('cy', scale.y(50))
     .classed('player', true)
     .call(drag);
 };
+
+Player.prototype.render = function() {
+  this.playerNode
+    .attr('cx', scale.x(this.x))
+    .attr('cy', scale.y(this.y))
+};
+
+Player.prototype.updateShip = function() {
+  if (this.y > 100) {
+    this.y = 0;
+  }
+  if (this.y < 0) {
+    this.y = 100;
+  }
+  if (this.x > 100) {
+    this.x = 0;
+  }
+  if (this.x < 0) {
+    this.x = 100;
+  }
+
+  if (UPKEY == true) {
+    this.y -= 1;
+  }
+  if (LEFTKEY == true) {
+    this.x -= 1;
+  }
+  if (RIGHTKEY == true) {
+    this.x += 1;
+  }
+  debugger;
+  this.render();
+}
 
 /******************************************************/
 /***D3 Setup*******************************************/
@@ -163,10 +251,11 @@ var enemies = createEnemies();
 renderEnemies();
 
 moveEnemies();
-setInterval(moveEnemies, gameOptions.intervalTime);
-setInterval(incrementScore, gameOptions.intervalTime / 10);
-
 var player = new Player();
+
+setInterval(moveEnemies, gameOptions.intervalTime);
+setInterval(player.updateShip.bind(player), gameOptions.intervalTime / 100);
+setInterval(incrementScore, gameOptions.intervalTime / 10);
 
 
 
