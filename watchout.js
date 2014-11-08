@@ -1,8 +1,8 @@
 // start slingin' some d3 here.
 
 var gameOptions = {
-  height: 450,
-  width: 700,
+  height: 600,
+  width: 900,
   nEnemies: 30,
   intervalTime: 2000
 };
@@ -17,10 +17,15 @@ var scale = {
   y: d3.scale.linear().domain([0, 100]).range([0, gameOptions.height])
 };
 
-var svgContainer = d3.select('.gameboardContainer')
+var gameBoardContainer = d3.select('.gameboardContainer');
+gameBoardContainer.style({'width': gameOptions.width + 'px', 'height': gameOptions.height + 'px'});
+
+var svgContainer = gameBoardContainer
   .append('svg')
   .attr('width', gameOptions.width)
   .attr('height', gameOptions.height);
+
+svgContainer.classed('gameboard', true);
 
 var createEnemies = function(){
   return _.range(0, gameOptions.nEnemies).map(function(index){

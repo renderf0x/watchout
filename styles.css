@@ -3,15 +3,33 @@
 /* Note: an asteroid image is included in this repo.
 Feel free to use it if you like. */
 
+body {
+  background-image: url('star-field.jpg');
+}
 
-.gameboardContainer {
-  box-shadow: 5px 5px 5px 5px;
-  height: 450px;
-  width: 700px;
+.gameboardContainer  {
+  position: absolute;
+  margin: auto;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  box-shadow: 2px 2px 2px 2px;
+}
+
+.scoreboard {
+  float: right;
+  margin: 20px;
+  padding: 40px;
+  background-color: black;
+  color: white;
+  opacity: .65;
+  border-radius: 100px;
 }
 
 .gameboard {
-  fill: gray;
+  background-color: black;
+  opacity: .75;
 }
 
 .enemy {
@@ -20,4 +38,7 @@ Feel free to use it if you like. */
 
 .player {
   fill: red;
+}
+
+.container {
 }
