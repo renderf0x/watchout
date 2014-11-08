@@ -7,3 +7,7 @@ Feel free to use it if you like. */
 .gameboardContainer {
   box-shadow: 5px 5px 5px 5px;
 }
+
+.player {
+  fill: red;
+}
