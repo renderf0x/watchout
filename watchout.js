@@ -42,14 +42,46 @@ var renderEnemies = function() {
 }
 
 var moveEnemies = function() {
-  svgContainer.selectAll('.enemy').transition()
+  svgContainer.selectAll('.enemy')
+    .transition()
     .duration(gameOptions.intervalTime)
     .attr('cx', function() {
       return scale.x(Math.random() * 100)
     })
     .attr('cy', function() {
       return scale.y(Math.random() * 100)
-    });
+    })
+    .tween('custom', tweenWithCollisionDetection);
+};
+
+var onCollision = function () {
+  console.log("Collision!!!!@@RUKFGOUYG");
+};
+
+var checkCollision = function (enemy, callback) {
+  //check here, then call onCollision
+  var enemyXPos = parseFloat(enemy.attr('cx'));
+  var enemyYPos = parseFloat(enemy.attr('cy'));
+  var playerXPos = parseFloat(player.playerNode.attr('cx'));
+  var playerYPos = parseFloat(player.playerNode.attr('cy'));
+  var radiusSum = parseFloat(enemy.attr('r')) + parseFloat(player.playerNode.attr('r'));
+
+  var xDiff = enemyXPos - playerXPos;
+  var yDiff = enemyYPos - playerYPos;
+
+  if (radiusSum > Math.sqrt(Math.pow(xDiff,2) + Math.pow(yDiff,2))){
+    callback();
+  }
+
+};
+
+var tweenWithCollisionDetection = function (endData) {
+  var enemy = d3.select(this);
+  //when we change collision behavior we can replace onCollision with
+  //something else
+  return function(t){
+    checkCollision(enemy, onCollision);
+  };
 };
 
 /******************************************************/
@@ -70,22 +102,21 @@ Player.prototype.createAndRenderPlayer = function(){
     .attr('cy', scale.y(50))
     .classed('player', true)
     .call(drag);
-    //return player
 };
 
 /******************************************************/
 /***D3 Setup*******************************************/
 
-var drag = d3.behavior.drag().on('drag', function(){
-  player.playerNode.attr('cx', function(){
-    return d3.event.x;
-  })
-  .attr('cy', function(){
-    return d3.event.y;
+var drag = d3.behavior.drag()
+  .on('drag', function(){
+    player.playerNode
+      .attr('cx', function(){
+        return d3.event.x;
+      })
+      .attr('cy', function(){
+        return d3.event.y;
+      });
   });
-});
-
-
 
 /******************************************************/
 /******************************************************/
