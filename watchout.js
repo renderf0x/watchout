@@ -4,16 +4,23 @@ var gameOptions = {
   height: 450,
   width: 700,
   nEnemies: 30,
-  intervalTime: 5000
-}
+  intervalTime: 2000
+};
+
+var gameStats = {
+  score: 0,
+  highScore: 0
+};
 
 var scale = {
   x: d3.scale.linear().domain([0, 100]).range([0, gameOptions.width]),
   y: d3.scale.linear().domain([0, 100]).range([0, gameOptions.height])
-}
+};
 
-var svgContainer = d3.select('.gameboardContainer').append('svg')
-  .attr('width', gameOptions.width).attr('height', gameOptions.height);
+var svgContainer = d3.select('.gameboardContainer')
+  .append('svg')
+  .attr('width', gameOptions.width)
+  .attr('height', gameOptions.height);
 
 var createEnemies = function(){
   return _.range(0, gameOptions.nEnemies).map(function(index){
@@ -39,7 +46,7 @@ var renderEnemies = function() {
       return scale.y(enemy.y);
     })
     .classed('enemy', true);
-}
+};
 
 var moveEnemies = function() {
   svgContainer.selectAll('.enemy')
@@ -55,7 +62,9 @@ var moveEnemies = function() {
 };
 
 var onCollision = function () {
-  console.log("Collision!!!!@@RUKFGOUYG");
+  // console.log("Collision!!!!@@RUKFGOUYG");
+  checkHighScore();
+  resetScore();
 };
 
 var checkCollision = function (enemy, callback) {
@@ -70,6 +79,8 @@ var checkCollision = function (enemy, callback) {
   var yDiff = enemyYPos - playerYPos;
 
   if (radiusSum > Math.sqrt(Math.pow(xDiff,2) + Math.pow(yDiff,2))){
+    // TODO: limit callback calls using a _.once-like var that resets using setTimeout
+    // (or something like that)
     callback();
   }
 
@@ -80,8 +91,30 @@ var tweenWithCollisionDetection = function (endData) {
   //when we change collision behavior we can replace onCollision with
   //something else
   return function(t){
+    // TODO: THIS TRIGGERS MULTIPLE TIMES PER COLLISION
     checkCollision(enemy, onCollision);
   };
+};
+
+var incrementScore = function() {
+  gameStats.score++;
+  d3.select('.current').select('span').text(gameStats.score);
+};
+
+var checkHighScore = function() {
+  if (gameStats.score > gameStats.highScore) {
+    gameStats.highScore = gameStats.score;
+    setHighScore();
+  }
+};
+
+var setHighScore = function() {
+  d3.select('.high').select('span').text(gameStats.highScore);
+};
+
+var resetScore = function() {
+  d3.select('.current').select('span').text(0);
+  gameStats.score = 0;
 };
 
 /******************************************************/
@@ -126,6 +159,7 @@ renderEnemies();
 
 moveEnemies();
 setInterval(moveEnemies, gameOptions.intervalTime);
+setInterval(incrementScore, gameOptions.intervalTime / 10);
 
 var player = new Player();
 
