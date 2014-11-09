@@ -77,6 +77,7 @@ var createEnemies = function(){
       // enemy velocity as a function of size
       x: Math.random() * 100,
       y: Math.random() * 100,
+      minSize: 10
     }
   });
 };
@@ -85,7 +86,9 @@ var renderEnemies = function() {
   svgContainer.selectAll('circle').data(enemies, function(d){return d.enemy_id})
     .enter()
     .append('circle')
-    .attr('r', 10)
+    .attr('r', function(enemy) {
+      return (Math.max(enemy.minSize, Math.random() * 30));
+    })
     .attr('enemy_id', function(enemy) {
       return enemy.enemy_id;
     })
@@ -122,6 +125,7 @@ var moveEnemies = function() {
 
 var onCollision = function () {
   // console.log("Collision!!!!@@RUKFGOUYG");
+  console.log('collided')
   checkHighScore();
   resetScore();
 };
@@ -130,10 +134,14 @@ var checkCollision = function (enemy, callback) {
   //check here, then call onCollision
   var enemyXPos = parseFloat(enemy.attr('cx'));
   var enemyYPos = parseFloat(enemy.attr('cy'));
-  var playerXPos = parseFloat(player.playerNode.attr('cx'));
-  var playerYPos = parseFloat(player.playerNode.attr('cy'));
-  var radiusSum = parseFloat(enemy.attr('r')) + parseFloat(player.playerNode.attr('r'));
+  // var playerXPos = parseFloat(player.playerNode.attr('cx'));
+  // var playerYPos = parseFloat(player.playerNode.attr('cy'));
+  var playerXPos = scale.x(player.x)
+  var playerYPos = scale.y(player.y)
+  // var radiusSum = parseFloat(enemy.attr('r')) + parseFloat(player.playerNode.attr('r'));
+  var radiusSum = parseFloat(enemy.attr('r')) + parseFloat(player.size);
 
+  // console.log(playerXPos, radiusSum)
   var xDiff = enemyXPos - playerXPos;
   var yDiff = enemyYPos - playerYPos;
 
@@ -183,29 +191,54 @@ var Player = function () {
   // x and y are scaled from 1-100
   this.x = 50;
   this.y = 50;
+  this.size = 20;
   this.velocity = 0;
   this.maxVelocity = 10;
   this.rotation = -Math.PI/2;
 
   this.createNode();
-  this.render();
+  // this.render();
   // this.setupDragging();
 };
 
 Player.prototype.createNode = function(){
+
+  // this.path = "M" +
+  //       (this.x+this.size*Math.cos(this.rotation))  + "," +
+  //       (this.y+this.size*Math.sin(this.rotation)) + "L" +
+  //       (this.x+this.size/1.5*Math.cos(this.rotation+2*Math.PI/3)) + "," +
+  //       (this.y+this.size/1.5*Math.sin(this.rotation+2*Math.PI/3)) + "L" +
+  //       (this.x+this.size/1.5*Math.cos(this.rotation+4*Math.PI/3))  + "," +
+  //       (this.y+this.size/1.5*Math.sin(this.rotation+4*Math.PI/3)) + "L" +
+  //       (this.x+this.size*Math.cos(this.rotation)) + "," +
+  //       (this.y+this.size*Math.sin(this.rotation));
+
+  // console.log(this.path);
   this.playerNode = svgContainer.selectAll('.player')
     .data([0])
     .enter()
-    .append('circle')
-    .attr('r', 10)
+    // .append('circle')
+    // .attr('r', 10)
+    .append('path')
+    .attr("d", this.path)
     .classed('player', true)
-    .call(drag);
+    // .call(drag);
 };
 
 Player.prototype.render = function() {
   this.playerNode
-    .attr('cx', scale.x(this.x))
-    .attr('cy', scale.y(this.y))
+    // .attr('cx', scale.x(this.x))
+    // .attr('cy', scale.y(this.y))
+  this.path = "M" +
+        (scale.x(this.x)+this.size*Math.cos(this.rotation))  + "," +
+        (scale.y(this.y)+this.size*Math.sin(this.rotation)) + "L" +
+        (scale.x(this.x)+this.size/1.5*Math.cos(this.rotation+2*Math.PI/3)) + "," +
+        (scale.y(this.y)+this.size/1.5*Math.sin(this.rotation+2*Math.PI/3)) + "L" +
+        (scale.x(this.x)+this.size/1.5*Math.cos(this.rotation+4*Math.PI/3))  + "," +
+        (scale.y(this.y)+this.size/1.5*Math.sin(this.rotation+4*Math.PI/3)) + "L" +
+        (scale.x(this.x)+this.size*Math.cos(this.rotation)) + "," +
+        (scale.y(this.y)+this.size*Math.sin(this.rotation));
+  this.playerNode.attr('d', this.path);
 };
 
 Player.prototype.updateShip = function() {
