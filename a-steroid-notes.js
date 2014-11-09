@@ -12,7 +12,7 @@
 √ ship rotation
 * shooting (bullets as small enemies)
 * collision change (have bullets and/or asteroids disappear FIRST)
-* ship appearance/asteroid appearance
+√ ship appearance/asteroid appearance
 
 // NICE TO HAVE
 * exploding asteroids
